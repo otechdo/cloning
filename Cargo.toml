@@ -1,0 +1,13 @@
+[package]
+name = "cloning"
+version = "0.0.1"
+edition = "2021"
+description = "Clone directory contents"
+readme = "README.md"
+categories = ["utilities"]
+keywords = ["clone", "cp", "fast", "progress"]
+repository = "https://github.com/otechdo/cloning"
+license-file = "LICENSE"
+[dependencies]
+indicatif = "0.17.8"
+walkdir = "2.5.0"

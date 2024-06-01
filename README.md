@@ -14,7 +14,3 @@ cargo install cloning
 ```bash
 cloning src dest
 ```
-
-## Demo
-
-![cloning-demo](cloning.gif)

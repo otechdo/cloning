@@ -1,12 +1,18 @@
 use indicatif::{ProgressBar, ProgressStyle};
-use std::{env::args, fs, path::Path};
+use std::{
+    env::args,
+    fs,
+    path::Path,
+    process::{exit, ExitCode},
+};
 use walkdir::WalkDir;
 
-fn main() {
+fn main() -> ExitCode {
     let args: Vec<String> = args().collect();
-    let source_directory = Path::new(args.get(1).unwrap().as_str()); // Replace with your source directory path
-    let destination_directory = Path::new(args.get(2).unwrap().as_str()); // Replace with your source directory path
-    copy_directory(source_directory, destination_directory);
+    let source = Path::new(args.get(1).unwrap().as_str()); // Replace with your source directory path
+    let destination = Path::new(args.get(2).unwrap().as_str()); // Replace with your source directory path
+    copy_directory(source, destination);
+    exit(0);
 }
 
 fn copy_directory(source: &Path, destination: &Path) {
@@ -14,20 +20,24 @@ fn copy_directory(source: &Path, destination: &Path) {
         .into_iter()
         .filter_map(Result::ok)
         .collect();
-
-    let pb = ProgressBar::new(entries.len() as u64).with_message("cloning");
-    pb.set_style(
-        ProgressStyle::default_bar()
-            .template("[ {eta} / {elapsed} ] [{bar:50.white}] {msg}")
-            .expect("")
-            .progress_chars("=-"),
-    );
+    let pb = ProgressBar::new(entries.len() as u64)
+        .with_message("cloning")
+        .with_style(
+            ProgressStyle::default_bar()
+                .template("[ {percent}% ]-[ {binary_bytes_per_sec} ]-[{bar:50.white}] {msg}")
+                .expect("")
+                .progress_chars("#-"),
+        );
 
     for entry in entries {
         let path = entry.path();
         let relative_path = path.strip_prefix(source).expect("msg");
         let destination_path = destination.join(relative_path);
-
+        let x: String = String::from(relative_path.to_str().unwrap());
+        if x.eq("lost+found") {
+            continue;
+        }
+        pb.set_message(x);
         if path.is_dir() {
             fs::create_dir_all(&destination_path).expect("");
             let permissions = fs::metadata(path).expect("").permissions();
@@ -37,7 +47,11 @@ fn copy_directory(source: &Path, destination: &Path) {
         }
         pb.inc(1);
     }
-    pb.finish_with_message("cloned");
+    pb.finish_with_message(format!(
+        "{} conned to {}",
+        source.to_str().unwrap(),
+        destination.to_str().unwrap()
+    ));
 }
 
 fn copy_file_with_permissions(source: &Path, destination: &Path) {

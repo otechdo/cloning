@@ -9,8 +9,10 @@ use walkdir::WalkDir;
 
 fn main() -> ExitCode {
     let args: Vec<String> = args().collect();
-    let source = Path::new(args.get(1).unwrap().as_str()); // Replace with your source directory path
-    let destination = Path::new(args.get(2).unwrap().as_str()); // Replace with your source directory path
+    let src = args.get(1).unwrap().to_string();
+    let dest = args.get(2).unwrap().to_string();
+    let source = Path::new(src.as_str()); // Replace with your source directory path
+    let destination = Path::new(dest.as_str()); // Replace with your source directory path
     copy_directory(source, destination);
     exit(0);
 }
@@ -24,7 +26,7 @@ fn copy_directory(source: &Path, destination: &Path) {
         .with_message("cloning")
         .with_style(
             ProgressStyle::default_bar()
-                .template("[ {percent}% ]-[ {binary_bytes_per_sec} ]-[{bar:50.white}] {msg}")
+                .template("[ {percent}% ]-[ {binary_bytes_per_sec} ]-[{bar:35.white}] {msg}")
                 .expect("")
                 .progress_chars("#-"),
         );
@@ -35,6 +37,8 @@ fn copy_directory(source: &Path, destination: &Path) {
         let destination_path = destination.join(relative_path);
         let x: String = String::from(relative_path.to_str().unwrap());
         if x.eq("lost+found") {
+            continue;
+        }else if destination_path.as_path().exists() {
             continue;
         }
         pb.set_message(x);
@@ -48,7 +52,7 @@ fn copy_directory(source: &Path, destination: &Path) {
         pb.inc(1);
     }
     pb.finish_with_message(format!(
-        "{} conned to {}",
+        "{} cloned to {}",
         source.to_str().unwrap(),
         destination.to_str().unwrap()
     ));

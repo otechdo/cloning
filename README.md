@@ -1,7 +1,7 @@
 
 # What'is ?
 
-It's a simple tool to synchronize directories from local machine.
+It's a simple tool to clone directories contents from the local machine.
 
 ## Installation
 
@@ -14,3 +14,7 @@ cargo install cloning
 ```bash
 cloning src dest
 ```
+
+## Demo
+
+![demo](cloning-demo.gif)

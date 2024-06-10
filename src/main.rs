@@ -4,6 +4,7 @@ use std::{
     fs,
     path::Path,
     process::{exit, ExitCode},
+    time::Duration,
 };
 use walkdir::WalkDir;
 
@@ -26,11 +27,12 @@ fn copy_directory(source: &Path, destination: &Path) {
         .with_message("cloning")
         .with_style(
             ProgressStyle::default_bar()
-                .template("[ {percent}% ]-[ {binary_bytes_per_sec} ]-[{bar:35.white}] {msg}")
+                .template("{spinner:.white} [ {eta} {elapsed} ]-[ {percent}% ]-[ {binary_bytes} {total_bytes} ] [{bar:50.white}] {msg}")
                 .expect("")
-                .progress_chars("#-"),
+                .progress_chars("## "),
         );
 
+    pb.enable_steady_tick(Duration::from_millis(75));
     for entry in entries {
         let path = entry.path();
         let relative_path = path.strip_prefix(source).expect("msg");
@@ -38,7 +40,7 @@ fn copy_directory(source: &Path, destination: &Path) {
         let x: String = String::from(relative_path.to_str().unwrap());
         if x.eq("lost+found") {
             continue;
-        }else if destination_path.as_path().exists() {
+        } else if destination_path.as_path().exists() {
             continue;
         }
         pb.set_message(x);

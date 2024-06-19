@@ -12,8 +12,12 @@ fn main() -> ExitCode {
     let args: Vec<String> = args().collect();
     let src = args.get(1).unwrap().to_string();
     let dest = args.get(2).unwrap().to_string();
-    let source = Path::new(src.as_str()); // Replace with your source directory path
-    let destination = Path::new(dest.as_str()); // Replace with your source directory path
+    let source = Path::new(src.as_str());
+    let destination = Path::new(dest.as_str());
+    if source.ne(destination) {
+        print!("The source must be different of the destination");
+        exit(1);
+    }
     copy_directory(source, destination);
     exit(0);
 }

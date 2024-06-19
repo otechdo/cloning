@@ -14,8 +14,8 @@ fn main() -> ExitCode {
     let dest = args.get(2).unwrap().to_string();
     let source = Path::new(src.as_str());
     let destination = Path::new(dest.as_str());
-    if source.ne(destination) {
-        print!("The source must be different of the destination");
+    if source.eq(destination) {
+        println!("The source must be different of the destination");
         exit(1);
     }
     copy_directory(source, destination);

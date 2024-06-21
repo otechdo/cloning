@@ -1,4 +1,7 @@
+use ignore::{Walk, WalkBuilder};
 use indicatif::{ProgressBar, ProgressStyle};
+use std::path::MAIN_SEPARATOR_STR;
+use std::thread::sleep;
 use std::{
     env::args,
     fs,
@@ -6,7 +9,6 @@ use std::{
     process::{exit, ExitCode},
     time::Duration,
 };
-use walkdir::WalkDir;
 
 fn main() -> ExitCode {
     let args: Vec<String> = args().collect();
@@ -14,8 +16,7 @@ fn main() -> ExitCode {
     let dest = args.get(2).unwrap().to_string();
     let source = Path::new(src.as_str());
     let destination = Path::new(dest.as_str());
-    if source.exists().ne(&true)
-    {
+    if source.exists().ne(&true) {
         println!("Source must be exists");
         exit(1);
     }
@@ -27,50 +28,50 @@ fn main() -> ExitCode {
         println!("Source must be a directory");
         exit(1);
     }
-    copy_directory(source, destination);
+    let x = WalkBuilder::new(source)
+        .threads(4)
+        .standard_filters(true)
+        .add_custom_ignore_filename("exclude.ji")
+        .build();
+    copy_directory(src, dest, x);
     exit(0);
 }
 
-fn copy_directory(source: &Path, destination: &Path) {
-    let entries: Vec<_> = WalkDir::new(source)
-        .into_iter()
-        .filter_map(Result::ok)
-        .collect();
-    let pb = ProgressBar::new(entries.len() as u64)
+fn copy_directory(source: String, destination: String, e: Walk) {
+    let c: Vec<Result<ignore::DirEntry, ignore::Error>> = e.collect();
+    let pb = ProgressBar::new(c.len() as u64)
         .with_message("cloning")
         .with_style(
             ProgressStyle::default_bar()
-                .template("{spinner:.white} [ {eta} {elapsed} ]-[ {percent}% ]-[ {binary_bytes} {total_bytes} ] [{bar:50.white}] {msg}")
+                .template("[ {percent}% ]-[ {binary_bytes} {total_bytes} ]-[{bar:50.white}] {msg}")
                 .expect("")
                 .progress_chars("## "),
         );
 
     pb.enable_steady_tick(Duration::from_millis(75));
-    for entry in entries {
-        let path = entry.path();
-        let relative_path = path.strip_prefix(source).expect("msg");
-        let destination_path = destination.join(relative_path);
-        let x: String = String::from(relative_path.to_str().unwrap());
-        if x.eq("lost+found") {
-            continue;
-        } else if destination_path.as_path().exists() {
-            continue;
-        }
-        pb.set_message(x);
+
+    for x in c {
+        let e = x.unwrap();
+        let path = e.path();
+        let current = e.path().to_str().unwrap();
+        let dest = path.strip_prefix(source.as_str()).unwrap();
+        let mut d = String::from(destination.as_str());
+        d.push_str(MAIN_SEPARATOR_STR);
+        d.push_str(dest.to_str().unwrap());
         if path.is_dir() {
-            fs::create_dir_all(&destination_path).expect("");
-            let permissions = fs::metadata(path).expect("").permissions();
-            fs::set_permissions(&destination_path, permissions).expect("");
-        } else if path.is_file() {
-            copy_file_with_permissions(path, &destination_path);
+            pb.set_message(format!("Creating {} directory", d.to_string()));
+            fs::create_dir_all(Path::new(d.as_str())).expect("");
+            let permissions = fs::metadata(e.path()).expect("").permissions();
+            fs::set_permissions(Path::new(d.as_str()), permissions).expect("");
+        } else {
+            pb.set_message(format!("Copying {} file", current.to_string()));
+            copy_file_with_permissions(e.path(), Path::new(d.as_str()));
         }
+
+        sleep(Duration::from_secs(4));
         pb.inc(1);
     }
-    pb.finish_with_message(format!(
-        "{} cloned to {}",
-        source.to_str().unwrap(),
-        destination.to_str().unwrap()
-    ));
+    pb.finish_with_message(format!("{} cloned to {}", source, destination));
 }
 
 fn copy_file_with_permissions(source: &Path, destination: &Path) {

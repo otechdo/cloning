@@ -14,8 +14,17 @@ fn main() -> ExitCode {
     let dest = args.get(2).unwrap().to_string();
     let source = Path::new(src.as_str());
     let destination = Path::new(dest.as_str());
+    if source.exists().ne(&true)
+    {
+        println!("Source must be exists");
+        exit(1);
+    }
     if source.eq(destination) {
         println!("The source must be different of the destination");
+        exit(1);
+    }
+    if source.is_file() {
+        println!("Source must be a directory");
         exit(1);
     }
     copy_directory(source, destination);

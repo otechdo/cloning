@@ -1,6 +1,6 @@
 [package]
 name = "cloning"
-version = "1.0.0"
+version = "2.0.0"
 edition = "2021"
 description = "Clone directory contents"
 readme = "README.md"
@@ -10,6 +10,6 @@ repository = "https://github.com/otechdo/cloning"
 license-file = "LICENSE"
 
 [dependencies]
+clap = { version = "4.5.7", features = ["derive"] }
 ignore = "0.4.22"
 indicatif = "0.17.8"
-walkdir = "2.5.0"

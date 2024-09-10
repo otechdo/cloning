@@ -10,23 +10,33 @@ cargo install cloning
 
 ## Usage
 
-```bash
-cloning -t '[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}' -s source -d dest -p '==-'
+```text
+Cloning source directory to destination
+
+Usage: cloning --template=<template> --progress=<progress> --source=<source> --destination=<destination> --clock=<clock>
+
+Options:
+      --template=<template>        the progress console output
+      --progress=<progress>        the progress bar progress chars
+      --source=<source>            the directory to clone
+      --destination=<destination>  the directory destination path
+      --clock=<clock>              Set the sleep time
+  -h, --help                       Print help
 ```
 
 ## Display help
 
 ```bash
-cloning -h
+cloning --help
 ```
 
-## Customize
-
-### Example
+## Example
 
 ```bash
-cloning -t '{spinner:.white} [{elapsed_precise}] [{bar:50.white}] {pos:>7}/{len:7} {msg}' -s source -d dest -c 250 -p '== '
+cloning --template='{spinner:.white} [{elapsed_precise}] [{bar:50.white}] {msg}' --progress='==-' --source='source' --destination='dest' --clock=250 
 ```
+
+## Template 
 
 * [**Templates**](https://docs.rs/indicatif/0.17.8/indicatif/#templates)
     * `bar`: renders a progress bar. By default, 20 characters wide. The style string is used to color the elapsed part,
@@ -60,13 +70,3 @@ cloning -t '{spinner:.white} [{elapsed_precise}] [{bar:50.white}] {pos:>7}/{len:
     * `eta`: the remaining time (like elapsed).
     * `duration_precise`: the extrapolated total duration (like elapsed_precise).
     * `duration`: the extrapolated total duration time (like elapsed).
-
-### Open dest directory
-
-```bash
-cloning src dest -t '[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}' -o
-```
-
-## Demo
-
-![demo](cloning-demo.gif)

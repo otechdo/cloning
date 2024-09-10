@@ -1,13 +1,13 @@
 [package]
 name = "cloning"
-version = "2.0.0"
+version = "2.1.0"
 edition = "2021"
 description = "Clone directory contents"
 readme = "README.md"
 categories = ["command-line-utilities"]
 keywords = ["clone", "cp", "fast", "progress"]
 repository = "https://github.com/otechdo/cloning"
-license-file = "LICENSE"
+license = "AGPL-3.0"
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
